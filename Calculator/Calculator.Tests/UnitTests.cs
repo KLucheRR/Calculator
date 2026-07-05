@@ -3,7 +3,7 @@
 namespace Calculator.Tests
 {
     [TestClass]
-    public sealed class Test1
+    public sealed class UnitTests
     {
         [TestInitialize]
         public void TestInit()

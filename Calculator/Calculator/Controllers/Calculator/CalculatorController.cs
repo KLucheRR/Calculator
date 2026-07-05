@@ -8,11 +8,11 @@ namespace Calculator.Controllers.Calculator
     {
         private readonly ILogger _logger;
 
-        public CalculatorController(ILogger logger)
+        public CalculatorController(ILogger<CalculatorController> logger)
         {
             _logger = logger;
         }
-        [HttpPost(Name = "Calculate")]
+        [HttpPost("Calculate")]
         public ActionResult<double> Calculate([FromBody] Query query)
         {
             try

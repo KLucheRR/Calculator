@@ -14,13 +14,17 @@ namespace Calculator
             builder.Services.AddOpenApi();
             builder.Services.AddLogging();
             builder.Services.AddHttpLogging();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.MapOpenApi();
+                app.MapSwagger();
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
             app.UseHttpsRedirection();
