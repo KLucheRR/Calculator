@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            width: 500px;
+        }
+        h1 {
+            font-size: 22px;
+            margin-bottom: 25px;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .input-field {
+            flex: 1;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.2s;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        select:focus {
+            outline: none;
+            border-color: #4a90d9;
+        }
+        .result-box {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 2px solid #e0e0e0;
+            min-height: 60px;
+        }
+        .result-label {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        #resultText {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            color: #1a1a1a;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #4a90d9;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        button:hover {
+            background: #357abd;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        button:disabled {
+            background: #b0c4de;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .error {
+            color: #d32f2f;
+        }
+        .loading {
+            color: #666;
+        }
+        .success {
+            color: #2e7d32;
+        }
+        .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Калькулятор</h1>
+        
+        <div class="input-group">
+            <div class="input-field">
+                <label for="numbersInput">Числа (через запятую)</label>
+                <textarea id="numbersInput" placeholder="1, 4, 7, 2">1, 4</textarea>
+                <div class="hint">Например: 1, 4, 7, 2</div>
+            </div>
+            <div class="input-field">
+                <label for="typeSelect">Тип операции</label>
+                <select id="typeSelect">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
+                <div class="hint">Выберите 0, 1, 2 или 3</div>
+            </div>
+        </div>
+
+        <div class="result-box">
+            <div class="result-label">📊 Результат:</div>
+            <div id="resultText">—</div>
+        </div>
+
+        <button id="calculateBtn">Вычислить</button>
+
+        <div id="statusText" class="status"></div>
+    </div>
+
+    <script>
+        const numbersInput = document.getElementById('numbersInput');
+        const typeSelect = document.getElementById('typeSelect');
+        const resultText = document.getElementById('resultText');
+        const statusText = document.getElementById('statusText');
+        const calculateBtn = document.getElementById('calculateBtn');
+
+        calculateBtn.addEventListener('click', async () => {
+            // Очистка статуса
+            statusText.className = 'status';
+            statusText.textContent = '⏳ Отправка запроса...';
+            resultText.textContent = '—';
+            calculateBtn.disabled = true;
+
+            // Парсим числа
+            const rawNumbers = numbersInput.value.trim();
+            const numbers = rawNumbers
+                .split(',')
+                .map(s => s.trim())
+                .filter(s => s !== '')
+                .map(Number);
+
+            if (numbers.length === 0 || numbers.some(isNaN)) {
+                statusText.className = 'status error';
+                statusText.textContent = '❌ Ошибка: введите корректные числа через запятую';
+                calculateBtn.disabled = false;
+                return;
+            }
+
+            const type = parseInt(typeSelect.value);
+
+            try {
+                const response = await fetch('https://localhost:7183/calculator/Calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        args: numbers,
+			      type: type
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Сервер вернул ошибку ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Красиво форматируем результат
+                resultText.textContent = JSON.stringify(data, null, 2);
+                statusText.className = 'status success';
+                statusText.textContent = '✅ Успешно!';
+            } catch (error) {
+                statusText.className = 'status error';
+                statusText.textContent = `❌ Ошибка: ${error.message}`;
+                resultText.textContent = '—';
+            } finally {
+                calculateBtn.disabled = false;
+            }
+        });
+
+        // Пример ввода по умолчанию
+        numbersInput.value = '1, 4';
+        typeSelect.value = '0';
+    </script>
+</body>
+</html>

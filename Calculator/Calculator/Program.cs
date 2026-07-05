@@ -16,6 +16,16 @@ namespace Calculator
             builder.Services.AddHttpLogging();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    policy =>
+                    {
+                        policy.AllowAnyOrigin()      
+                              .AllowAnyMethod()      
+                              .AllowAnyHeader();     
+                    });
+            });
 
             var app = builder.Build();
 
@@ -24,7 +34,7 @@ namespace Calculator
             {
                 app.MapSwagger();
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI();                
             }
 
             app.UseHttpsRedirection();
@@ -32,6 +42,7 @@ namespace Calculator
 
             app.UseAuthorization();
 
+            app.UseCors("AllowAll");
 
             app.MapControllers();
 
