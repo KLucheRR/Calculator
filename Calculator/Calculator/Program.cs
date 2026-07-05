@@ -12,6 +12,8 @@ namespace Calculator
             builder.Services.AddControllers();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
+            builder.Services.AddLogging();
+            builder.Services.AddHttpLogging();
 
             var app = builder.Build();
 
@@ -22,6 +24,7 @@ namespace Calculator
             }
 
             app.UseHttpsRedirection();
+            app.UseHttpLogging();
 
             app.UseAuthorization();
 
